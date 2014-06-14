@@ -40,9 +40,9 @@ BACKUP_TIMESTAMP="$HOME/.backup_timestamp"
 
 if [ ! $1 ]
 then
-		echo "USAGE: $0 [DIRECTORY]"
-		echo "What directory should I back up?"
-		exit 2
+	echo "USAGE: $0 [DIRECTORY]"
+	echo "What directory should I back up?"
+	exit 2
 fi
 
 # Generate a filename for the backup archive
@@ -52,22 +52,22 @@ BACKUP_FILENAME="backup-"$(hostname -s)"-"$(date "+%F-%H-%M-%S")".tar.gz"
 # do an incremental backup of files changed since last backup
 if [ ! -e $BACKUP_TIMESTAMP -o "$2" == "-f" ]
 then
-		echo "FULL backup: No timestamp detected or forced"
-		echo -n " > Creating archive of \"$1\"... "
-		find $1 -xdev -print0 | tar czf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
-		echo "DONE"
+	echo "FULL backup: No timestamp detected or forced"
+	echo -n " > Creating archive of \"$1\"... "
+	find $1 -xdev -print0 | tar czf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
+	echo "DONE"
 else
-		if [ ! $(find $1 -xdev -newer $BACKUP_TIMESTAMP) ]
-		then
-		  echo "NO backup: No changes since last backup"
-			exit 0
-		else
-			LAST_BACKUP=$(date -r $BACKUP_TIMESTAMP "+%F %T")
-			echo "INCREMENTAL backup: Last backup was at $LAST_BACKUP"
-			echo -n " > Creating archive of changed files... "
-			find $1 -xdev -newer $BACKUP_TIMESTAMP -print0 | tar czf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
-			echo "DONE"
-		fi
+	if [ ! $(find $1 -xdev -newer $BACKUP_TIMESTAMP) ]
+	then
+		echo "NO backup: No changes since last backup"
+		exit 0
+	else
+		LAST_BACKUP=$(date -r $BACKUP_TIMESTAMP "+%F %T")
+		echo "INCREMENTAL backup: Last backup was at $LAST_BACKUP"
+		echo -n " > Creating archive of changed files... "
+		find $1 -xdev -newer $BACKUP_TIMESTAMP -print0 | tar czf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
+		echo "DONE"
+	fi
 fi
 
 # Upload the archive file to Dropbox
