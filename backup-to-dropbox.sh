@@ -31,7 +31,7 @@
 ###
 
 REMOTE_DIR="/"
-DROPBOX_UPLOADER="dropbox_uploader.sh"
+DROPBOX_UPLOADER="$HOME/bin/dropbox_uploader.sh"
 
 TMP_DIR="/tmp"
 BACKUP_TIMESTAMP="$HOME/.backup_timestamp"
@@ -57,7 +57,7 @@ then
 	find $1 -xdev -print0 | tar czf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
 	echo "DONE"
 else
-	if [ ! $(find $1 -xdev -newer $BACKUP_TIMESTAMP) ]
+	if [ ! $(find $1 -xdev -newer $BACKUP_TIMESTAMP -print0) ]
 	then
 		echo "NO backup: No changes since last backup"
 		exit 0
@@ -65,10 +65,13 @@ else
 		LAST_BACKUP=$(date -r $BACKUP_TIMESTAMP "+%F %T")
 		echo "INCREMENTAL backup: Last backup was at $LAST_BACKUP"
 		echo -n " > Creating archive of changed files... "
-		find $1 -xdev -newer $BACKUP_TIMESTAMP -print0 | tar czf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
+		find $1 -xdev -newer $BACKUP_TIMESTAMP -print0 | tar czvf $TMP_DIR/$BACKUP_FILENAME --null -T - &> /dev/null
 		echo "DONE"
 	fi
 fi
+
+# Let it be known that the backup has taken place!
+touch $BACKUP_TIMESTAMP
 
 # Upload the archive file to Dropbox
 $DROPBOX_UPLOADER upload $TMP_DIR/$BACKUP_FILENAME $REMOTE_DIR
@@ -77,8 +80,5 @@ $DROPBOX_UPLOADER upload $TMP_DIR/$BACKUP_FILENAME $REMOTE_DIR
 echo -n " > Performing cleanup... "
 rm $TMP_DIR/$BACKUP_FILENAME
 echo "DONE"
-
-# Let it be known that the backup has taken place!
-touch $BACKUP_TIMESTAMP
 
 exit 0
