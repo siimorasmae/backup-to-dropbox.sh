@@ -10,6 +10,8 @@ A working install of [Dropbox_Uploader](https://github.com/andreafabrizi/Dropbox
 
 ### Usage
 
+Make sure that the path to dropbox_uploader.sh is defined correctly, then:
+
 ```
 	./backup-to-dropbox.sh [DIRECTORY] [-f]
 ```
